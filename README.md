@@ -22,4 +22,7 @@ Installation (assuming a Debian/Raspbian buster or better Linux distribution)
   7)  if you want whatsnew to run as a service
       - vi whatsnew.service - modify to point to your local paths
       - vi whatsnewWrapper - modify to point to your local paths
+  8)  sudo cp -p whatsnew.service /lib/system.d/service/
+  9)  sudo systemctl enable whatsnew.service
+ 10)  sudo systemctl start whatsnew.service
 
