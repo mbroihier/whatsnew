@@ -1,0 +1,12 @@
+[Unit]
+Description=What's New
+After=network.target
+
+[Service]
+ExecStart=/home/pi/whatsnew/whatsnewWrapper
+Restart=always
+RestartSec=10
+
+[Install]
+Alias=whatsnew.service
+WantedBy=default.target
