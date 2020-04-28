@@ -1,0 +1,10 @@
+//
+//   Warning!!! Do NOT commit the .h file created by cmake
+//
+#define whatsnew_VERSION_NUMBER @PROJECT_VERSION@
+#define PROTOCOL @PROTOCOL@
+#define URL @URL@
+#define SOURCE_DESTINATION @SOURCE_DESTINATION@
+#define CREDENTIALS @CREDENTIALS@
+#define DEBUG @DEBUG@
+#define POLL @POLL_RATE@
