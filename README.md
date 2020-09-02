@@ -10,19 +10,21 @@ Installation (assuming a Debian/Raspbian buster or better Linux distribution)
   1)  sudo apt-get update
   2)  sudo apt-get upgrade
   3)  sudo apt-get install git
-  4)  sudo apt-get build-essentials
-  5)  sudo apt-get cmake
-  6)  git clone https://github.com/mbroihier/whatsnew
+  4)  sudo apt-get install build-essential
+  5)  sudo apt-get install cmake
+  6)  sudo apt-get install libcurl4-gnutls-dev
+  7)  sudo apt-get install dnsutils
+  8)  git clone https://github.com/mbroihier/whatsnew
       - cd whatsnew
       - mkdir build
       - vi CMakeLists.txt and modify parameters discussed above
       - cd build
       - cmake ..
       - make
-  7)  if you want whatsnew to run as a service
+  9)  if you want whatsnew to run as a service
       - vi whatsnew.service - modify to point to your local paths
       - vi whatsnewWrapper - modify to point to your local paths
-  8)  sudo cp -p whatsnew.service /lib/system.d/service/
-  9)  sudo systemctl enable whatsnew.service
- 10)  sudo systemctl start whatsnew.service
+ 10)  sudo cp -p whatsnew.service /lib/systemd/system/
+ 11)  sudo systemctl enable whatsnew.service
+ 12)  sudo systemctl start whatsnew.service
 
