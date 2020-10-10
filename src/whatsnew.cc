@@ -6,6 +6,7 @@
  *
  */
 /* ---------------------------------------------------------------------- */
+#include <dirent.h>
 #include <getopt.h>
 #include <unistd.h>
 #include "whatsnewConfig.h"
@@ -81,7 +82,7 @@ size_t static sendInfo(void *whatsGoing,
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
 /*
- *      getIP.cc -- get this machine's public IP
+ *      getNewFile.cc -- Get a new file from the directory being watched
  *
  *      Copyright (C) 2020 
  *          Mark Broihier
@@ -89,23 +90,31 @@ size_t static sendInfo(void *whatsGoing,
  */
 
 /* ---------------------------------------------------------------------- */
-bool whatsnew::getIP() {
-  char newPayload[1024];
-  memset(newPayload, 0, sizeof(newPayload));
-  FILE * digCmd = popen("/usr/bin/dig TXT +short o-o.myaddr.l.google.com @ns1.google.com", "r");
-  fscanf(digCmd, "%s", newPayload);
-  pclose(digCmd);
-  int lenO = strlen(payload);
-  int lenN = strlen(newPayload);
+bool whatsnew::getNewFile() {
+  bool foundSomething = false;
+  DIR *directory;
+  struct dirent * entry;
+  if ((directory = opendir(DIR_PATH)) != NULL) {
+    while ((entry = readdir(directory)) != NULL) {
+      if (debug) fprintf(stdout, "Directory entry: %s \n", entry->d_name);
+      std::map<std::string, std::string>::iterator location = files.find(entry->d_name);
+      if (location == files.end()) {
+        if (debug) fprintf(stdout, "New file being reported: %s \n", entry->d_name);
+        files[std::string(entry->d_name)] = std::string(entry->d_name);
+        memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
+        if (debug) fprintf(stdout, "payload: %s\n", payload);
+        foundSomething = true;
+      }
+    }
+  }
   if (debug) {
-    fprintf(stdout, "Current IP is: %s\n", payload);
-    fprintf(stdout, "old length: %d, new length %d\n", lenO, lenN);
+    for (auto & thing : files) {
+      fprintf(stdout, "files content: %s\n", thing.first.c_str());
+    }
+    fprintf(stdout, "contents of payload: %s\n", payload);
   }
-  if (((lenO != lenN) && (lenN > 0)) || ((lenN > 0) && strncmp(payload, newPayload, lenO))) {
-    memcpy(payload, newPayload, lenN+1);
-    return true;
-  }
-  return false;
+  if (debug) fprintf(stdout, "returning an indicator that %s", foundSomething ? "we found something\n" : "we didn't find anything new\n");
+  return foundSomething;
 }
 /* ---------------------------------------------------------------------- */
 /* ---------------------------------------------------------------------- */
@@ -204,7 +213,7 @@ int main(int argc, char *argv[]) {
   fprintf(stdout, "Entering main processing loop\n");
   while (!doneProcessing) {
     sleep(pollRate);
-    if (whatsnewInstance.getIP()) {
+    if (whatsnewInstance.getNewFile()) {
       whatsnewInstance.send();
     }
     fprintf(stdout, "Cycle completed - status: %d\n", doneProcessing);

@@ -8,3 +8,4 @@
 #define CREDENTIALS @CREDENTIALS@
 #define DEBUG @DEBUG@
 #define POLL @POLL_RATE@
+#define DIR_PATH @DIR_PATH@
