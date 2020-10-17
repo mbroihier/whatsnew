@@ -14,6 +14,7 @@
 #include <iostream>
 #include <map>
 #include <string>
+#include <time.h>
 /* ---------------------------------------------------------------------- */
 #define STRINGIZER(arg)  #arg
 #define STR_VALUE(arg) STRINGIZER(arg)
@@ -26,7 +27,7 @@ static int  pollRate = POLL;
 class whatsnew {
  private:
   CURL *sendMail;
-  std::map<std::string, std::string> files;
+  std::map<std::string, time_t> files;
 
  public:
   void send(void);

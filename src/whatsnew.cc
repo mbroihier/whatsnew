@@ -94,17 +94,27 @@ bool whatsnew::getNewFile() {
   bool foundSomething = false;
   DIR *directory;
   struct dirent * entry;
+  time_t  now;
+  time(&now);
   if ((directory = opendir(DIR_PATH)) != NULL) {
     while ((entry = readdir(directory)) != NULL) {
       if (debug) fprintf(stdout, "Directory entry: %s \n", entry->d_name);
-      std::map<std::string, std::string>::iterator location = files.find(entry->d_name);
+      std::map<std::string, time_t>::iterator location = files.find(entry->d_name);
       if (location == files.end()) {
         if (debug) fprintf(stdout, "New file being reported: %s \n", entry->d_name);
-        files[std::string(entry->d_name)] = std::string(entry->d_name);
+        files[std::string(entry->d_name)] = now;
         memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
         if (debug) fprintf(stdout, "payload: %s\n", payload);
         foundSomething = true;
+      } else {
+        files[std::string(entry->d_name)] = now;
       }
+    }
+  }
+  std::map<std::string, time_t>::iterator iterator;
+  for (iterator = files.begin() ; iterator != files.end(); iterator++) {
+    if (difftime(now, iterator->second) > (pollRate * 3)) {
+      files.erase(iterator);
     }
   }
   if (debug) {
