@@ -90,11 +90,13 @@ size_t static sendInfo(void *whatsGoing,
  */
 
 /* ---------------------------------------------------------------------- */
-bool whatsnew::getNewFile() {
+bool whatsnew::getNewFile(bool firstTime) {
+  char cmd[1024];
   bool foundSomething = false;
   DIR *directory;
   struct dirent * entry;
   time_t  now;
+  memset(cmd, 0, sizeof(cmd));
   time(&now);
   if ((directory = opendir(DIR_PATH)) != NULL) {
     while ((entry = readdir(directory)) != NULL) {
@@ -105,6 +107,17 @@ bool whatsnew::getNewFile() {
         files[std::string(entry->d_name)] = now;
         memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
         if (debug) fprintf(stdout, "payload: %s\n", payload);
+        if (! firstTime) {
+          sprintf(cmd, "/usr/bin/scp -p %s%s surcam@surCamMaster:/blks/surCam/", DIR_PATH, entry->d_name);
+          FILE * scpCmd = popen(cmd, "r");
+          if (scpCmd) {
+            if (pclose(scpCmd)) {
+              fprintf(stdout, "Failure detected when closing copy pipe for: %s\n", entry->d_name);
+            }
+          } else {
+            fprintf(stdout, "Failure detected when attempting to copy file: %s\n", entry->d_name);
+          }
+        }
         foundSomething = true;
       } else {
         files[std::string(entry->d_name)] = now;
@@ -220,6 +233,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  whatsnewInstance.getNewFile(true);
   fprintf(stdout, "Entering main processing loop\n");
   while (!doneProcessing) {
     sleep(pollRate);

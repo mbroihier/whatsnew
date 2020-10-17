@@ -31,7 +31,7 @@ class whatsnew {
 
  public:
   void send(void);
-  bool getNewFile(void);
+  bool getNewFile(bool firstTime=false);
   whatsnew();
   ~whatsnew();
 };
