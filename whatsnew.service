@@ -3,7 +3,8 @@ Description=What's New
 After=network.target
 
 [Service]
-ExecStart=/home/pi/whatsnew/whatsnewWrapper
+User=pi
+ExecStart=/home/pi/whatsnewfile/whatsnewWrapper
 Restart=always
 RestartSec=10
 
