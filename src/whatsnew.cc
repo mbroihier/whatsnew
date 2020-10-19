@@ -157,6 +157,7 @@ void whatsnew::send() {
   curl_easy_setopt(sendMail, CURLOPT_URL, url);
   curl_easy_setopt(sendMail, CURLOPT_USERPWD,  credentials);
   curl_easy_setopt(sendMail, CURLOPT_USE_SSL, CURLUSESSL_ALL);
+  curl_easy_setopt(sendMail, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_3);
   curl_easy_setopt(sendMail, CURLOPT_MAIL_FROM, source_destination);
   struct curl_slist *list;
   list = curl_slist_append(NULL, source_destination);
@@ -165,9 +166,14 @@ void whatsnew::send() {
   curl_easy_setopt(sendMail, CURLOPT_READDATA, & lineNumber);
   curl_easy_setopt(sendMail, CURLOPT_UPLOAD, 1L);
   if (debug) {
+    fprintf(stdout, "current content of source_destination: %s\n", source_destination);
+    fprintf(stdout, "current content of credentials: %s\n", credentials);
     curl_easy_setopt(sendMail, CURLOPT_VERBOSE, 1L);
   }
-  curl_easy_perform(sendMail);
+  CURLcode result = curl_easy_perform(sendMail);
+  if (result) {
+    fprintf(stderr, "Curlcode: %d\n", result);
+  }
   curl_slist_free_all(list);
   curl_easy_cleanup(sendMail);
 }
@@ -190,6 +196,9 @@ whatsnew::whatsnew() {
   if (versionData->version_num < 0x074000) {  // this code wants 7.64.0 or greater
     fprintf(stderr, "This curl version is not new enough - detected version is: %8.8x\n", versionData->version_num);
     exit(1);
+  }
+  if (debug) {
+    fprintf(stdout, "This curl version is: %8.8x\n", versionData->version_num);
   }
 }
 /* ---------------------------------------------------------------------- */
@@ -233,7 +242,9 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  whatsnewInstance.getNewFile(true);
+  if (whatsnewInstance.getNewFile(true)) {
+    whatsnewInstance.send();
+  }
   fprintf(stdout, "Entering main processing loop\n");
   while (!doneProcessing) {
     sleep(pollRate);
