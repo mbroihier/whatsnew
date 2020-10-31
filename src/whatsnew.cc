@@ -130,6 +130,16 @@ bool whatsnew::getNewFile(bool firstTime) {
       files.erase(iterator);
     }
   }
+  // remove old files on remote machine
+  sprintf(cmd, "/usr/bin/ssh surcam@surCamMaster \"find /blks/surCam/ -type f -mtime +3 | xargs rm \"");
+  FILE * scpCmd = popen(cmd, "r");
+  if (scpCmd) {
+    if (pclose(scpCmd)) {
+      fprintf(stdout, "Failure detected when closing delete pipe\n");
+    }
+  } else {
+    fprintf(stdout, "Failure detected when attempting to delete files\n");
+  }
   if (debug) {
     for (auto & thing : files) {
       fprintf(stdout, "files content: %s\n", thing.first.c_str());
