@@ -123,6 +123,7 @@ bool whatsnew::getNewFile(bool firstTime) {
         files[std::string(entry->d_name)] = now;
       }
     }
+    closedir(directory);
   }
   std::map<std::string, time_t>::iterator iterator;
   for (iterator = files.begin() ; iterator != files.end(); iterator++) {
