@@ -103,20 +103,26 @@ bool whatsnew::getNewFile(bool firstTime) {
       if (debug) fprintf(stdout, "Directory entry: %s \n", entry->d_name);
       std::map<std::string, time_t>::iterator location = files.find(entry->d_name);
       if (location == files.end()) {
-        if (debug) fprintf(stdout, "New file being reported: %s \n", entry->d_name);
-        files[std::string(entry->d_name)] = now;
-        memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
-        if (debug) fprintf(stdout, "payload: %s\n", payload);
         if (! firstTime) {
           sprintf(cmd, "/usr/bin/scp -p %s%s surcam@surCamMaster:/blks/surCam/", DIR_PATH, entry->d_name);
           FILE * scpCmd = popen(cmd, "r");
           if (scpCmd) {
             if (pclose(scpCmd)) {
               fprintf(stdout, "Failure detected when closing copy pipe for: %s\n", entry->d_name);
+            } else { // file was successfully transferred, make a record of that
+              if (debug) fprintf(stdout, "New file being reported: %s \n", entry->d_name);
+              files[std::string(entry->d_name)] = now;
+              memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
+              if (debug) fprintf(stdout, "payload: %s\n", payload);
             }
           } else {
             fprintf(stdout, "Failure detected when attempting to copy file: %s\n", entry->d_name);
           }
+        } else { // when it is the first time, record all files
+          if (debug) fprintf(stdout, "New file being reported: %s \n", entry->d_name);
+          files[std::string(entry->d_name)] = now;
+          memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
+          if (debug) fprintf(stdout, "payload: %s\n", payload);
         }
         foundSomething = true;
       } else {
@@ -125,6 +131,7 @@ bool whatsnew::getNewFile(bool firstTime) {
     }
     closedir(directory);
   }
+  // The following will remove files from the map that have been deleted and have been gone N polling cycles
   std::map<std::string, time_t>::iterator iterator;
   for (iterator = files.begin() ; iterator != files.end(); iterator++) {
     if (difftime(now, iterator->second) > (pollRate * 3)) {
@@ -133,9 +140,9 @@ bool whatsnew::getNewFile(bool firstTime) {
   }
   // remove old files on remote machine
   sprintf(cmd, "/usr/bin/ssh surcam@surCamMaster \"find /blks/surCam/ -type f -mtime +3 | xargs rm \"");
-  FILE * scpCmd = popen(cmd, "r");
-  if (scpCmd) {
-    if (pclose(scpCmd)) {
+  FILE * delCmd = popen(cmd, "r");
+  if (delCmd) {
+    if (pclose(delCmd)) {
       fprintf(stdout, "Failure detected when closing delete pipe\n");
     }
   } else {
