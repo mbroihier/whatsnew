@@ -11,10 +11,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <curl/curl.h>
+#include <time.h>
 #include <iostream>
 #include <map>
 #include <string>
-#include <time.h>
 /* ---------------------------------------------------------------------- */
 #define STRINGIZER(arg)  #arg
 #define STR_VALUE(arg) STRINGIZER(arg)
@@ -24,14 +24,15 @@ const char credentials[] = STR_VALUE(CREDENTIALS);
 const char dir_path[] = STR_VALUE(DIR_PATH);
 static bool debug = DEBUG;
 static int  pollRate = POLL;
+static char payload[1024];
 class whatsnew {
  private:
   CURL *sendMail;
-  std::map<std::string, time_t> files;
 
  public:
   void send(void);
-  bool getNewFile(bool firstTime=false);
+  size_t static sendInfo(void *whatsGoing, size_t size, size_t blocks, void *myPointer);
+  virtual bool task(char * payload, bool firstTime = false) = 0;
   whatsnew();
   ~whatsnew();
 };
