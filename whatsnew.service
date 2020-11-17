@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 User=pi
-ExecStart=/home/pi/whatsnewfile/whatsnewWrapper
+ExecStart=/home/pi/whatsnew/whatsnewWrapper
 Restart=always
 RestartSec=10
 
