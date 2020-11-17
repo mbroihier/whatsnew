@@ -156,7 +156,7 @@ whatsnew::~whatsnew() {
 
 int main(int argc, char *argv[]) {
   lineNumber = 0;
-  whatsnewfile * whatsnewInstance = whatsnewfile::getInstance();
+  whatsnewip * whatsnewInstance = whatsnewip::getInstance();
   int c;
 
   memset(payload, 0, sizeof(payload));
