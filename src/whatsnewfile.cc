@@ -46,12 +46,13 @@ bool whatsnewfile::task(char * payload, bool firstTime) {
           if (scpCmd) {
             if (pclose(scpCmd)) {
               fprintf(stdout, "Failure detected when closing copy pipe for: %s\n", entry->d_name);
+              // do not record so it will be repeated
             } else {  // file was successfully transferred, make a record of that
               if (debug) fprintf(stdout, "New file being reported: %s \n", entry->d_name);
               files[std::string(entry->d_name)] = now;
-              memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
-              if (debug) fprintf(stdout, "payload: %s\n", payload);
             }
+            memcpy(payload, entry->d_name, strlen(entry->d_name) + 1);
+            if (debug) fprintf(stdout, "payload: %s\n", payload);
           } else {
             fprintf(stdout, "Failure detected when attempting to copy file: %s\n", entry->d_name);
           }
